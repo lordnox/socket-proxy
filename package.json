@@ -1,0 +1,32 @@
+{
+  "name": "socket-proxy",
+  "version": "0.0.1-alpha",
+  "main": "server.coffee",
+  "dependencies": {
+    "moment": "~2.5.0",
+    "http-proxy": "~0.10.4",
+    "engine.io": "~0.7.14",
+    "engine.io-client": "~0.7.14",
+    "node-uuid": "~1.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tobias Kopelke",
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lordnox/socket-proxy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lordnox/socket-proxy/issues"
+  },
+  "homepage": "https://github.com/lordnox/socket-proxy",
+  "TODO": [
+    "Add tests",
+    "Add grunt",
+    "Add descriptions",
+    "Add alot of stuff :-D"
+  ]
+}

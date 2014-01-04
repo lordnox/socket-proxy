@@ -1,0 +1,23 @@
+#!/usr/bin/env coffee
+
+program       = require 'commander'
+
+toPort = (port) -> parseInt(port, 10)
+
+program
+  .version('0.0.1')
+  .option('-p, --port <n>', 'port used for the proxy', toPort)
+  .option('-P, --socket-port <n>', 'port used as the internal socket server', toPort)
+  .parse(process.argv);
+
+{config, log} = require '../shared'
+
+program.port        ?= config.ports.proxy
+program.socketPort  ?= config.ports.socket
+
+Proxy = require '../server'
+
+proxy = new Proxy program
+proxy.listen ->
+  console.log 'server started'
+

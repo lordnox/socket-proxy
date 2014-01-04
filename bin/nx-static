@@ -1,0 +1,28 @@
+#!/usr/bin/env coffee
+
+program       = require 'commander'
+
+toPort = (port) -> parseInt(port, 10)
+
+program
+  .version('0.0.1')
+  .usage('[options] path')
+  .option('-p, --port <n>', 'port used for the proxy', toPort)
+  .parse(process.argv);
+
+{config, log} = require '../shared'
+Static        = require "../static"
+wrapper       = require "../client-wrapper"
+
+program.port ?= 3000
+
+# config for the socket-client-wrapper
+config =
+  path: program.args.shift() or "/"
+
+# configure the static-file-server
+server = new Static
+  path: "."
+
+wrapper config, server.httpServer, ->
+  console.log "server is listening now %d", server.httpServer.address().port

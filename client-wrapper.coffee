@@ -32,10 +32,13 @@ module.exports = (config, server, fn) ->
 
   stop = ->
     console.log 'stopping server'
+    server.close()
   start = (port) ->
     console.log 'starting server on ' + port
     server.listen port
-
+  cleanUp = ->
+    console.log 'cleanUp'
+    stop()
 
   connect (socket) ->
     send = (data) -> socket.send JSON.stringify data
@@ -51,6 +54,13 @@ module.exports = (config, server, fn) ->
       type: 'register'
       path: config.path
       port: config.port
+
+    socket.on 'close', ->
+      cleanUp()
+      log "server connection closed"
+    socket.on 'error', (err) ->
+      cleanUp()
+      log "server connection error", err
 
     socket.on 'message', (utf8) ->
       data = JSON.parse utf8

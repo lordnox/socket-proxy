@@ -1,79 +1,110 @@
 
-{config, log} = require './shared'
-
 uuid          = require 'node-uuid'
 httpProxy     = require 'http-proxy'
 engine        = require 'engine.io'
-socketServer  = engine.listen config.ports.socket, -> log "Server startet on port " + config.ports.socket
-
-routing = {}
-
-port = config.ports.socket
-makePort = (p) -> p || ++port
+http          = require 'http'
+async         = require 'async'
 
 
-proxyServer = httpProxy.createServer (req, res, proxy) ->
-  buffer = httpProxy.buffer req
+# debuggin purposes, needs to be cleaned at some pont
+{log}         = require './shared'
 
-  urls = Object.keys routing
-  urls.sort (a, b) -> b.length - a.length
+class Proxy
 
-  path = false
+  constructor: (config) ->
 
-  url = req.url
-  console.log urls, url
+    port      = config.socketPort
+    makePort  = (p) -> p || port++
 
-  urls.some (_path) ->
-    return false if _path.length > url.length
-    rest = url.substr _path.length
-    sign = rest[0]
-    return false if url.length isnt path.length and sign isnt '/'
-    part = url.substr 0, _path.length
-    return false if _path isnt part
-    path = _path
+    @socketServerInstance  = http.createServer()
+    @proxyServerInstance   = httpProxy.createServer (req, res, proxy) ->
+      buffer = httpProxy.buffer req
 
-  if not path
-    res.writeHead 404,
-      'Content-Type': 'text/plain'
-    res.write 'not found'
-    return res.end()
+      urls = Object.keys routing
+      urls.sort (a, b) -> b.length - a.length
 
-  req.url = url.substr path.length
+      path = false
 
-  proxy.proxyRequest req, res,
-    host: '127.0.0.1'
-    port: routing[path]
-    buffer: buffer
+      url = req.url
+      console.log urls, url
 
-proxyServer.listen config.ports.proxy, -> "Proxy-Server started on port " + config.ports.proxy
+      urls.some (_path) ->
+        return false if _path.length > url.length
+        part = url.substr 0, _path.length
+        rest = url.substr _path.length - 1
+        sign = rest[0]
+        return false if _path isnt part
+        return false if url.length isnt _path.length and sign isnt '/'
+        path = _path
 
-socketServer.on 'connection', (socket) ->
-  client = socket.transport.sid
+      if not path
+        res.writeHead 404,
+          'Content-Type': 'text/plain'
+        res.write 'not found'
+        return res.end()
 
-  send = (data) ->
-    log data
-    socket.send JSON.stringify data
+      req.url = url.substr path.length - 1
+      console.log req.url
 
-  request = (data) ->
-    send
-      type: 'request'
-      body: data
-      uuid: uuid()
+      request =
+        host: 'localhost'
+        port: routing[path]
+        buffer: buffer
 
-  socket.on 'message', (utf8) ->
-    data = JSON.parse utf8
-    log data
+      console.log 'sending proxyrequest to', request.host + ':' + request.port
+      proxy.proxyRequest req, res, request
 
-    switch data.type
-      when 'register'
-        routing[data.path] = makePort data.port
+    #@proxyServerInstance.proxy.on 'start', (req, res, target)-> console.log 'start', target
+    #@proxyServerInstance.proxy.on 'proxyError', (err, req, res)-> console.log 'proxyError', err
+
+    @socketServer          = engine.attach @socketServerInstance
+
+    @listen = (fn) ->
+      async.parallel [
+        (cb) => @proxyServerInstance.listen config.port, cb
+        (cb) => @socketServerInstance.listen makePort(), cb
+      ], fn or ->
+
+    routing = {}
+
+    @socketServer.on 'connection', (socket) ->
+      log "Client connected"
+
+      routes = []
+      client = socket.transport.sid
+
+      cleanUp = ->
+        routes.forEach (route) ->
+          delete routing[route]
+
+      send = (data) ->
+        socket.send JSON.stringify data
+
+      request = (data) ->
         send
-          type: 'registered'
-          port: routing[data.path]
-          uuid: data.uuid or uuid()
+          type: 'request'
+          body: data
+          uuid: uuid()
 
-  socket.on 'close', ->
-    log "Client disconnected"
+      socket.on 'message', (utf8) ->
+        data = JSON.parse utf8
 
-  socket.on 'error', (err) ->
-    log "Client error", err
+        switch data.type
+          when 'register'
+            log "Client registered route: " + data.path
+            routes.push data.path
+            routing[data.path] = makePort data.port
+            send
+              type: 'registered'
+              port: routing[data.path]
+              uuid: data.uuid or uuid()
+
+      socket.on 'close', ->
+        cleanUp()
+        log "Client disconnected"
+
+      socket.on 'error', (err) ->
+        cleanUp()
+        log "Client error", err
+
+module.exports = Proxy

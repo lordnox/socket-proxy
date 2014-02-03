@@ -1,8 +1,7 @@
 #!/usr/bin/env coffee
 
 program       = require 'commander'
-
-toPort = (port) -> parseInt(port, 10)
+{config, log, toPort} = require '../src/shared'
 
 program
   .version('0.0.1')
@@ -10,9 +9,8 @@ program
   .option('-p, --port <n>', 'port used for the proxy', toPort)
   .parse(process.argv);
 
-{config, log} = require '../shared'
-Static        = require "../static"
-wrapper       = require "../client-wrapper"
+Static        = require "../src/static"
+wrapper       = require "../src/client-wrapper"
 
 program.port ?= 3000
 

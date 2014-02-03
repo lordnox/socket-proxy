@@ -1,8 +1,9 @@
 #!/usr/bin/env coffee
 
 program       = require 'commander'
+{config, log, toPort} = require '../src/shared'
 
-toPort = (port) -> parseInt(port, 10)
+debug = require('debug') 'nx-proxy:bin:server'
 
 program
   .version('0.0.1')
@@ -10,14 +11,12 @@ program
   .option('-P, --socket-port <n>', 'port used as the internal socket server', toPort)
   .parse(process.argv);
 
-{config, log} = require '../shared'
-
 program.port        ?= config.ports.proxy
 program.socketPort  ?= config.ports.socket
 
-Proxy = require '../server'
+Proxy = require '../src/server'
 
 proxy = new Proxy program
 proxy.listen ->
-  console.log 'server started'
+  debug 'server started'
 

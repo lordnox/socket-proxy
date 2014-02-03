@@ -1,17 +1,53 @@
 {
   "name": "socket-proxy",
   "version": "0.0.1-alpha",
-  "main": "server.coffee",
-  "dependencies": {
-    "moment": "~2.5.0",
-    "http-proxy": "~0.10.4",
-    "engine.io": "~0.7.14",
-    "engine.io-client": "~0.7.14",
-    "node-uuid": "~1.4.1",
-    "commander": "~2.1.0",
-    "node-static": "~0.7.2"
+  "main": "coffee.js",
+  "devDependencies": {
+    "bower": "*",
+    "chai": "*",
+    "coffee-script": "*",
+    "commander": "*",
+    "debug": "*",
+    "engine.io": "*",
+    "engine.io-client": "*",
+    "grunt": "*",
+    "grunt-angular-templates": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-connect": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-css": "*",
+    "grunt-gh-pages": "*",
+    "grunt-jasmine-node": "*",
+    "grunt-karma": "*",
+    "grunt-simple-mocha": "*",
+    "grunt-open": "*",
+    "grunt-shell": "*",
+    "http-proxy": "*",
+    "jasmine-node": "*",
+    "karma": "*",
+    "karma-chrome-launcher": "*",
+    "karma-coffee-preprocessor": "*",
+    "karma-firefox-launcher": "*",
+    "karma-html2js-preprocessor": "*",
+    "karma-jasmine": "*",
+    "karma-mocha": "*",
+    "karma-ng-scenario": "*",
+    "karma-phantomjs-launcher": "*",
+    "karma-requirejs": "*",
+    "karma-safari-launcher": "*",
+    "karma-script-launcher": "*",
+    "matchdep": "*",
+    "mocha": "*",
+    "moment": "*",
+    "node-static": "*",
+    "node-uuid": "*",
+    "request": "*",
+    "grunt-contrib-jshint": "~0.8.0"
   },
-  "devDependencies": {},
+  "dependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -35,5 +71,8 @@
     "Add descriptions",
     "Add alot of stuff :-D",
     "Remove node_modules :-S"
-  ]
+  ],
+  "directories": {
+    "test": "test"
+  }
 }

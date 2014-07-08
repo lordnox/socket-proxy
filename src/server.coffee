@@ -108,8 +108,6 @@ class Proxy
     res.end()
 
   request: (req, res, proxy) =>
-    # buffer the incoming request to not loose any data
-    buffer    = httpProxy.buffer req
     # find redirect target
     redirect  = findMatch req.url, @routingKeys
     # return if not found
@@ -119,14 +117,13 @@ class Proxy
     # change the requests url if needed
     req.url = redirect.url or req.url if route.client.reroute
     # build the new request for the internal route
-    request =
-      host: 'localhost'
-      port: route.port
-      buffer: buffer
+    options =
+      target: "http://localhost:#{route.port}"
     # debug
     log "proxying %s>%s", route.client.name, req.url
     # proxy the request
-    proxy.proxyRequest req, res, request
+    @proxyServer.web req, res, options
+    #proxy.proxyRequest req, res, request
 
   addRoute: (path, client, port) ->
     @routing[path] =
@@ -161,15 +158,19 @@ class Proxy
 
     @socketServerInstance  = http.createServer()
 
-    @proxyServerInstance   = httpProxy.createServer @request
+    @proxyServerInstance   = http.createServer @request
+
+    @proxyServer           = new httpProxy.createProxyServer {}
 
     @socketServer          = engine.attach @socketServerInstance
 
     @listen = (fn) =>
+      socketPort = @makePort()
       async.parallel [
         (cb) => @proxyServerInstance.listen config.port, cb
-        (cb) => @socketServerInstance.listen @makePort(), cb
-      ], fn or ->
+        (cb) => @socketServerInstance.listen socketPort, cb
+      ], =>
+        (fn or ->) @proxyServerInstance.address().port, @socketServerInstance.address().port
 
     @stop = (fn) =>
       async.parallel [

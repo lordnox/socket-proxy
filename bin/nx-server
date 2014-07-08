@@ -17,6 +17,7 @@ program.socketPort  ?= config.ports.socket
 Proxy = require '../src/server'
 
 proxy = new Proxy program
-proxy.listen ->
-  debug 'server started'
+proxy.listen (p1, p2) ->
+  debug "server started on #{p1}:#{p2}"
+
 

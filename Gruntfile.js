@@ -166,7 +166,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
-  grunt.registerTask('default', ['jshint' ,'jasmine_node']);
+  grunt.registerTask('default', ['jshint' ,'test']);
 
 /*
   grunt.registerTask('kx-preprocess:dev', function() {
